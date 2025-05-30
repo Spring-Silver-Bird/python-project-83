@@ -1,34 +1,38 @@
 name: project-check
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10.12]
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.11'
+
       - name: Install dependencies
         run: |
-          pipx install uv
-          make install
-      - name: Run linter and pytest
+          python -m pip install --upgrade pip
+          pip install uv flake8 pytest
+          uv sync
+
+      - name: Install additional dependencies and run tests
         run: |
-          make lint
-          make test
-      - name: Publish code coverage stat
-        uses: paambaati/codeclimate-action@v5.0.0
-        if: github.ref_name == 'main'
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        with:
-          coverageCommand: make test-coverage
-          debug: true
+          pip install -e .
+          pip install pytest flask
+          python -m pytest tests/
+
+      - name: Run linter
+        run: flake8 .
