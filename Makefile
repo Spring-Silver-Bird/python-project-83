@@ -18,4 +18,7 @@ render-start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
 test:
-	uv run pytest
+		PYTHONPATH=$(PWD) uv run pytest -vv
+
+test-coverage:
+		uv run pytest --cov=gendiff --cov-report xml
