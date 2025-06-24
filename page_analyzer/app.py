@@ -7,22 +7,18 @@ from flask import (
     url_for,
     flash,
     request)
-import requests
-from requests.exceptions import RequestException
-from datetime import datetime
+
 
 from page_analyzer.url_validator import validate_and_normalize_url as validate_url
 from page_analyzer.data_base import (
     get_connection,
-    get_url_id,
-    get_all_urls,
-    insert_url,
-    is_url_existing)
+    insert_new_url,
+    get_existing_urls)
 
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-DATABASE_URL = os.getenv('DATABASE_URL')
+
 
 
 @app.route('/')
@@ -36,14 +32,13 @@ def urls():
     Displays a list of all URLs in the database with their latest check status.
     Sorted by ID in descending order (newest first).
     """
-    conn = get_connection(DATABASE_URL)
-    urls = get_all_urls(conn)
+
+    urls = get_existing_urls()
     return render_template("urls.html", urls=urls)
 
 @app.route("/urls", methods=["POST"])
 def add_url():
     url_input = request.form.get("url", "").strip()
-    conn = get_connection(DATABASE_URL)
 
     try:
         normalized_url = validate_url(url_input)
@@ -54,10 +49,11 @@ def add_url():
         return render_template("index.html", error_message=str(e)), 422
 
     if is_url_existing(domain):
-        return redirect(url_for("url_detail", id=get_url_id(conn, domain)))
+
+        return redirect(url_for("url_detail", id=get_url_id(domain)))
 
     try:
-        new_id = insert_url(conn, domain)
+        new_id = insert_new_url(domain)
         flash("Страница успешно добавлена", "success")
         return redirect(url_for("url_detail", id=new_id))
 
