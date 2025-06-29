@@ -16,10 +16,7 @@ def get_connection(db_url=DATABASE_URL):
 def insert_new_url(domain):
     """Inserts a new URL into the database and returns the ID."""
     with get_connection() as conn, conn.cursor() as cur:
-        cur.execute("""
-            INSERT INTO urls (name)
-            VALUES (%s) RETURNING id;
-        """,
+        cur.execute("INSERT INTO urls (name) VALUES (%s) RETURNING id",
         (domain,))
         url_id = cur.fetchone()[0]
         return url_id
