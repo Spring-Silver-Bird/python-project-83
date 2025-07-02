@@ -10,6 +10,7 @@ def get_connection(db_url=DATABASE_URL):
     """Establishes and returns a connection to the PostgreSQL database."""
     conn = psycopg2.connect(db_url)
     conn.autocommit = True
+    print('connection to the PostgreSQL database')
     return conn
 
 
@@ -28,10 +29,21 @@ def get_existing_urls():
         return cur.fetchall()
 
 
-def is_url_existing(conn, domain):
+def get_url_id(domain):
+    """Fetches the ID of the URL from the database."""
+    with get_db_connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            'SELECT id FROM urls WHERE LOWER(TRIM(name)) = LOWER(TRIM(%s));',
+            (domain,),
+        )
+        existing = cur.fetchone()
+        return existing[0] if existing else None
+
+
+def is_url_existing(domain):
     """Checks if the URL already exists in the database."""
     try:
-        with conn.cursor() as cur:
+        with get_connection() as conn, conn.cursor() as cur:
             cur.execute(
                 'SELECT id FROM urls WHERE LOWER(TRIM(name)) = LOWER(TRIM(%s));',
                 (domain,),

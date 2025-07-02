@@ -71,7 +71,7 @@ def url_detail(id):
     - All historical checks (status codes, timestamps)
     """
 
-    conn = get_connection(DATABASE_URL)
+    conn = get_connection()
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
         url_row = cur.fetchone()
