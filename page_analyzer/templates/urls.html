@@ -38,7 +38,7 @@
                 {% for url in urls %}
                 <tr>
                     <td>{{ url.id }}</td>
-                    <td><a href="{{ url_for('url_detail', id=url.id) }}">http://{{ url.name }}</a></td>
+                    <td><a href="{{ url_for('url_detail', url_id=url.id) }}">http://{{ url.name }}</a></td>
                     <td>
                         {% if url.last_check %}
                         {{ url.last_check.strftime('%Y-%m-%d') }}

@@ -6,18 +6,26 @@ from flask import (
     redirect,
     url_for,
     flash,
+    get_flashed_messages,
     request)
+from urllib.parse import urlparse
 
 
-from page_analyzer.url_validator import validate_and_normalize_url as validate_url
+from page_analyzer.url_validator import normalize_url, validate_url
 from page_analyzer.data_base import (
     get_connection,
+    get_existing_urls,
     insert_new_url,
-    get_existing_urls)
+    is_url_existing,
+    get_url_id,
+    get_url_data,
+    get_url_checks,)
+
 
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 
@@ -38,60 +46,41 @@ def urls():
 
 @app.route("/urls", methods=["POST"])
 def add_url():
-    url_input = request.form.get("url", "").strip()
+    new_url = request.form.get('url')
+    errors = validate_url(new_url)
+    if errors:
+        flash("Некорректный URL", "danger")
+        return render_template(
+            "index.html",
+            flashed_messages=get_flashed_messages(with_categories=True),
+        ), 422
 
-    try:
-        normalized_url = validate_url(url_input)
-        domain = urlparse(normalized_url).netloc.lower()
+    normalized_url = normalize_url(new_url)
+    if is_url_existing(normalized_url):
+        flash("Страница уже существует", "info")
+        url_id = get_url_id(normalized_url)
+        return redirect(url_for("url_detail", url_id=url_id))
 
-    except ValueError as e:
-        flash(str(e), "danger")
-        return render_template("index.html", error_message=str(e)), 422
-
-    if is_url_existing(domain):
-
-        return redirect(url_for("url_detail", id=get_url_id(domain)))
-
-    try:
-        new_id = insert_new_url(domain)
-        flash("Страница успешно добавлена", "success")
-        return redirect(url_for("url_detail", id=new_id))
-
-    except Exception as e:
-        flash(f"Ошибка при добавлении"
-              f" страницы в базу данных: {str(e)}", "danger")
-        return redirect(url_for("index"))
+    url_id = insert_new_url(normalized_url)
+    flash("Страница успешно добавлена", "success")
+    return redirect(url_for("url_detail", url_id=url_id))
 
 
-@app.route("/urls/<int:id>")
-def url_detail(id):
+@app.route("/urls/<int:url_id>")
+def url_detail(url_id):
     """
     Displays detailed information about a specific URL:
     - URL metadata
     - All historical checks (status codes, timestamps)
     """
 
-    conn = get_connection()
-    with conn.cursor() as cur:
-        cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-        url_row = cur.fetchone()
-        url = {
-            'id': url_row[0],
-            'name': url_row[1],
-            'created_at': url_row[2]
-        } if url_row else None
+    url_info = get_url_data(url_id)
+    url = {
+        'id': url_info[0],
+        'name': url_info[1],
+        'created_at': url_info[2]
+    }
 
-        cur.execute("SELECT * FROM url_checks"
-                    " WHERE url_id = %s ORDER BY id DESC", (id,))
-        checks = []
-        for check_row in cur.fetchall():
-            checks.append({
-                'id': check_row[0],
-                'status_code': check_row[2],
-                'h1': check_row[3],
-                'title': check_row[4],
-                'description': check_row[5],
-                'created_at': check_row[6]
-            })
+    checks = get_url_checks(url_id) or None
 
     return render_template("url_detail.html", url=url, checks=checks)
