@@ -14,10 +14,11 @@
 {% endif %}
 {% endblock %}
 
-{% block headline1 %}Сайт: {{ url.name }}{% endblock %}
+{%  block h1  %}Сайт: {{ url.name }}{% endblock %}
 
 {% block content %}
 <div class="table-responsive">
+    <h1>Сайт: {{ url.name }}</h1>
     <table class="table table-bordered table-hover text-nowrap" data-test="url">
         <tbody>
             <tr>
@@ -36,7 +37,7 @@
     </table>
 </div>
 <h2 class="mt-5 mb-3">Проверки</h2>
-<form method="post" action="{{ url_for('url_detail', url_id=url.id) }}">
+<form method="post" action="{{ url_for('check_url', url_id=url.id) }}" class="mb-3">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
 </form>
 <div>
@@ -55,10 +56,10 @@
         <tbody>
             <tr>
                 <td>{{ url_checked.id }}</td>
-                <td>{{ url_checked.status_code if url_checked.status_code else '' }}</td>
-                <td>{{ url_checked.h1 if url_checked.h1 else '' }}</td>
-                <td>{{ url_checked.title if url_checked.title else '' }}</td>
-                <td>{{ url_checked.description if url_checked.description else '' }}</td>
+                <td> 200 </td>
+                <td> ... </td>
+                <td> ... </td>
+                <td> ... </td>
                 <td>{{ url_checked.created_at }}</td>
             </tr>
         </tbody>

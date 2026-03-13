@@ -13,13 +13,13 @@ from urllib.parse import urlparse
 
 from page_analyzer.url_validator import normalize_url, validate_url
 from page_analyzer.data_base import (
-    get_connection,
     get_existing_urls,
     insert_new_url,
     is_url_existing,
     get_url_id,
     get_url_data,
-    get_url_checks,)
+    get_url_checks,
+    add_url_checks,)
 
 
 load_dotenv()
@@ -75,12 +75,18 @@ def url_detail(url_id):
     """
 
     url_info = get_url_data(url_id)
-    url = {
-        'id': url_info[0],
-        'name': url_info[1],
-        'created_at': url_info[2]
-    }
-
     checks = get_url_checks(url_id) or None
 
-    return render_template("url_detail.html", url=url, checks=checks)
+    return render_template("url_detail.html", url=url_info, urls_checked=checks)
+
+@app.route("/urls/<int:url_id>/checks", methods=['POST'])
+def check_url(url_id):
+    url_info = get_url_data(url_id)
+    print('Try checked...')
+    try:
+        check = add_url_checks(url_id)
+        flash('Страница успешно проверена', 'success')
+        return redirect(url_for('url_detail', url_id=url_id))
+    except Exception as e:
+        flash('Произошла ошибка при проверке', 'danger')
+        return redirect(url_for('url_detail', url_id=url_id))

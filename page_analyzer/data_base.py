@@ -51,14 +51,36 @@ def get_url_data(url_id):
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(sql, (url_id,))
         url_info = cur.fetchone()
+        url = {
+            'id': url_info[0],
+            'name': url_info[1],
+            'created_at': url_info[2]
+        }
         if not url_info:
             return None
-        return url_info
+        return url
 
 
-def get_url_checks(url_id):
+def add_url_checks(url_id):
     sql = """
-        SELECT id, status_code, title, h1, description, created_at 
+    INSERT INTO urls_checks (url_id) VALUES (%s) RETURNING id;
+    """
+    status_code = 200
+    h1 = 'text1'
+    title = 'text2'
+    description_tag = 'text3'
+
+    print('Try to post url checks...')
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute(sql, (url_id,))
+        url_id = cur.fetchone()[0]
+        return url_id
+
+        
+def get_url_checks(url_id):
+    print('Try to get checks...')
+    sql = """
+        SELECT id, created_at 
         FROM url_checks 
         WHERE url_id = %s 
         ORDER BY id DESC
@@ -69,17 +91,14 @@ def get_url_checks(url_id):
         for check_row in cur.fetchall():
             checks.append({
                 'id': check_row[0],
-                'status_code': check_row[2],
-                'h1': check_row[3],
-                'title': check_row[4],
-                'description': check_row[5],
-                'created_at': check_row[6]
+                'created_at': check_row[1]
             })
         return checks
 
 def get_url_id(name):
     """Fetches the ID of the URL from the database."""
     sql = "SELECT id FROM urls WHERE name = %s;"
+    print('Try to get url id...')
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(sql, (name,))
         url_id = cur.fetchone()[0] or {}
@@ -89,6 +108,7 @@ def get_url_id(name):
 def is_url_existing(url):
     """Checks if the URL already exists in the database."""
     sql = "SELECT id FROM urls WHERE name=%s;"
+    print('Try to get urls...')
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(sql, (url,))
         existing = cur.fetchone()
