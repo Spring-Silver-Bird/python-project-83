@@ -75,18 +75,25 @@ def url_detail(url_id):
     """
 
     url_info = get_url_data(url_id)
-    checks = get_url_checks(url_id) or None
+    checks = get_url_checks(url_id)
 
     return render_template("url_detail.html", url=url_info, urls_checked=checks)
 
 @app.route("/urls/<int:url_id>/checks", methods=['POST'])
 def check_url(url_id):
-    url_info = get_url_data(url_id)
     print('Try checked...')
-    try:
+    check = add_url_checks(url_id)
+    checks = get_url_checks(url_id)
+    if check:
+        flash('Страница успешно проверена', 'success')
+        return redirect(url_for('url_detail', url_id=url_id, urls_checked=checks))
+    else:
+        flash('Произошла ошибка при проверке', 'danger')
+        return redirect(url_for('url_detail', url_id=url_id, urls_checked=checks))
+    """try:
         check = add_url_checks(url_id)
         flash('Страница успешно проверена', 'success')
         return redirect(url_for('url_detail', url_id=url_id))
     except Exception as e:
         flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for('url_detail', url_id=url_id))
+        return redirect(url_for('url_detail', url_id=url_id))"""

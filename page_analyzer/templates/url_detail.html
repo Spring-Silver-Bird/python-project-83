@@ -55,12 +55,12 @@
         {% for url_checked in urls_checked %}
         <tbody>
             <tr>
-                <td>{{ url_checked.id }}</td>
+                <td>{{ url_checked.id  or '' }}</td>
                 <td> 200 </td>
                 <td> ... </td>
                 <td> ... </td>
                 <td> ... </td>
-                <td>{{ url_checked.created_at }}</td>
+                <td>{{ url_checked.created_at.strftime('%Y-%m-%d')  or '' }}</td>
             </tr>
         </tbody>
         {% endfor %}

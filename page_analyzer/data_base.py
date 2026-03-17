@@ -63,7 +63,7 @@ def get_url_data(url_id):
 
 def add_url_checks(url_id):
     sql = """
-    INSERT INTO urls_checks (url_id) VALUES (%s) RETURNING id;
+    INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id;
     """
     status_code = 200
     h1 = 'text1'
