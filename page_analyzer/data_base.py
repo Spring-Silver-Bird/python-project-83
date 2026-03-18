@@ -41,9 +41,10 @@ def get_existing_urls() -> object:
             urls.append({
                 'id': url[0],
                 'name': url[1],
-                'created_at': url[2]
+                'last_check': url[2],
+                'status_code': url[3],
             })
-
+        print(*urls, sep='/n')
         return urls
 
 def get_url_data(url_id):
@@ -63,16 +64,16 @@ def get_url_data(url_id):
 
 def add_url_checks(url_id):
     sql = """
-    INSERT INTO url_checks (url_id) VALUES (%s) RETURNING id;
+    INSERT INTO url_checks (url_id, status_code, h1, title, description_tag) VALUES (%s, %s, %s, %s, %s,) RETURNING id;
     """
     status_code = 200
-    h1 = 'text1'
-    title = 'text2'
-    description_tag = 'text3'
+    h1 = '-'
+    title = '-'
+    description_tag = '-'
 
     print('Try to post url checks...')
     with get_connection() as conn, conn.cursor() as cur:
-        cur.execute(sql, (url_id,))
+        cur.execute(sql, (url_id, status_code, h1, title, description_tag))
         url_id = cur.fetchone()[0]
         return url_id
 
@@ -80,7 +81,7 @@ def add_url_checks(url_id):
 def get_url_checks(url_id):
     print('Try to get checks...')
     sql = """
-        SELECT id, created_at 
+        SELECT id, created_at, status_code, h1, title, description_tag
         FROM url_checks 
         WHERE url_id = %s 
         ORDER BY id DESC
@@ -91,7 +92,11 @@ def get_url_checks(url_id):
         for check_row in cur.fetchall():
             checks.append({
                 'id': check_row[0],
-                'created_at': check_row[1]
+                'created_at': check_row[1],
+                'status_code': check_row[2],
+                'h1': check_row[3],
+                'title': check_row[4],
+                'description_tag': check_row[5],
             })
         return checks
 
