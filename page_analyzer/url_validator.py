@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import validators
 from urllib.parse import urlparse
 
+import validators
 
 
 def normalize_url(url: str) -> str:
@@ -10,6 +10,7 @@ def normalize_url(url: str) -> str:
     normalized_url = f"{parsed_url.scheme}://{parsed_url.hostname}"
     print(f'Normalize URL: {normalized_url}')
     return normalized_url
+
 
 def validate_url(url: str) -> bool:
     """Validate URL format"""

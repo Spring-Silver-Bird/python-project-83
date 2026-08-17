@@ -52,14 +52,14 @@
                 <th>Дата создания</th>
             </tr>
         </thead>
-        {% for url_checked in urls_checked %}
+        {% for url_checked in (urls_checked or []) %}
         <tbody>
             <tr>
                 <td>{{ url_checked.id  or '' }}</td>
-                <td> 200 </td>
-                <td> ... </td>
-                <td> ... </td>
-                <td> ... </td>
+                <td>{{ url_checked.id  or '' }}</td>
+                <td>{{ url_checked.id  or '' }}</td>
+                <td>{{ url_checked.title  or '' }}</td>
+                <td>{{ url_checked.description_tag  or '' }}</td>
                 <td>{{ url_checked.created_at.strftime('%Y-%m-%d')  or '' }}</td>
             </tr>
         </tbody>
