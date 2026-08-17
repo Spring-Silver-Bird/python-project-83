@@ -104,7 +104,8 @@ class UrlData:
                     url_checks.status_code
                 FROM urls
                 LEFT JOIN url_checks ON urls.id = url_checks.url_id
-                ORDER BY urls.id, url_checks.created_at DESC, url_checks.id DESC
+                ORDER BY urls.id, url_checks.created_at DESC,
+                         url_checks.id DESC
             ) AS sub
             ORDER BY id DESC
         """
@@ -129,4 +130,3 @@ class UrlData:
                     else:
                         row[field] = truncate_text(row[field])
             return url_checks_info
-

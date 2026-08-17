@@ -88,7 +88,9 @@ def url_detail(url_id):
     if not url_info:
         abort(404)
 
-    return render_template("url_detail.html", url=url_info, urls_checked=checks)
+    return render_template(
+        'url_detail.html', url=url_info, urls_checked=checks
+    )
 
 
 @app.route("/urls/<int:url_id>/checks", methods=['POST'])
