@@ -1,3 +1,5 @@
+PORT ?= 8000
+
 install:
 	uv sync
 
@@ -7,7 +9,6 @@ dev:
 lint:
 	uv run ruff check .
 
-PORT ?= 8000
 start:
 	uv run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
@@ -17,8 +18,5 @@ build:
 render-start:
 	gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
-test:
-		PYTHONPATH=$(PWD) uv run pytest -vv
-
-test-coverage:
-		uv run pytest --cov=gendiff --cov-report xml
+lint-fix:
+		uv run ruff check --fix

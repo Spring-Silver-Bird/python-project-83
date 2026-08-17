@@ -1,38 +1,47 @@
-from dotenv import load_dotenv
 import os
+
+import requests
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from flask import (
     Flask,
-    render_template,
-    redirect,
-    url_for,
+    abort,
     flash,
     get_flashed_messages,
-    request)
-from urllib.parse import urlparse
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
-
+from page_analyzer.data_base import UrlData
 from page_analyzer.url_validator import normalize_url, validate_url
-from page_analyzer.data_base import (
-    get_existing_urls,
-    insert_new_url,
-    is_url_existing,
-    get_url_id,
-    get_url_data,
-    get_url_checks,
-    add_url_checks,)
-
 
 load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+url_data = UrlData(DATABASE_URL)
+
+
+def parse_seo(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    h1 = soup.h1.get_text(strip=True) if soup.h1 else ''
+    title = soup.title.get_text(strip=True) if soup.title else ''
+    meta_description = soup.find('meta', attrs={'name': 'description'})
+    description = (
+        meta_description.get('content', '') if meta_description else ''
+    )
+    return h1, title, description
 
 
 @app.route('/')
 def index():
     """Render main page"""
-    return render_template('index.html')
+    messages = get_flashed_messages()
+    return render_template('index.html', messages=messages, url='')
+
 
 @app.route("/urls", methods=["GET"])
 def urls():
@@ -40,28 +49,28 @@ def urls():
     Displays a list of all URLs in the database with their latest check status.
     Sorted by ID in descending order (newest first).
     """
-
-    urls = get_existing_urls()
+    urls = url_data.get_existing_urls()
     return render_template("urls.html", urls=urls)
+
 
 @app.route("/urls", methods=["POST"])
 def add_url():
-    new_url = request.form.get('url')
-    errors = validate_url(new_url)
+    url = request.form.to_dict()
+    errors = validate_url(url['url'])
+
     if errors:
         flash("Некорректный URL", "danger")
         return render_template(
             "index.html",
-            flashed_messages=get_flashed_messages(with_categories=True),
         ), 422
 
-    normalized_url = normalize_url(new_url)
-    if is_url_existing(normalized_url):
-        flash("Страница уже существует", "info")
-        url_id = get_url_id(normalized_url)
-        return redirect(url_for("url_detail", url_id=url_id))
-
-    url_id = insert_new_url(normalized_url)
+    normalized_url = normalize_url(url['url'])
+    repo = UrlData(DATABASE_URL)
+    url_info = repo.find_url(normalized_url)
+    if url_info is not None:
+        flash('Страница уже существует', 'danger')
+        return redirect(url_for('url_detail', url_id=url_info.get('id')))
+    url_id = repo.insert_new_url(normalized_url)
     flash("Страница успешно добавлена", "success")
     return redirect(url_for("url_detail", url_id=url_id))
 
@@ -73,27 +82,52 @@ def url_detail(url_id):
     - URL metadata
     - All historical checks (status codes, timestamps)
     """
+    url_info = url_data.find_id(url_id)
+    checks = url_data.get_url_checks(url_id)
 
-    url_info = get_url_data(url_id)
-    checks = get_url_checks(url_id)
+    if not url_info:
+        abort(404)
 
     return render_template("url_detail.html", url=url_info, urls_checked=checks)
 
+
 @app.route("/urls/<int:url_id>/checks", methods=['POST'])
 def check_url(url_id):
-    print('Try checked...')
-    check = add_url_checks(url_id)
-    checks = get_url_checks(url_id)
-    if check:
-        flash('Страница успешно проверена', 'success')
-        return redirect(url_for('url_detail', url_id=url_id, urls_checked=checks))
-    else:
+    url_row = url_data.find_id(url_id)
+    if not url_row:
+        abort(404)
+    url = url_row['name']
+    try:
+        r = requests.get(url, timeout=10)
+    except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for('url_detail', url_id=url_id, urls_checked=checks))
-    """try:
-        check = add_url_checks(url_id)
-        flash('Страница успешно проверена', 'success')
         return redirect(url_for('url_detail', url_id=url_id))
-    except Exception as e:
+
+    status_code = r.status_code
+    if str(status_code)[0] in ('4', '5'):
         flash('Произошла ошибка при проверке', 'danger')
-        return redirect(url_for('url_detail', url_id=url_id))"""
+        return redirect(url_for('url_detail', url_id=url_id))
+
+    h1, title, desc = parse_seo(r.text)
+
+    url_data.add_url_check(
+        {
+            'status': status_code,
+            'h1': h1,
+            'title': title,
+            'description': desc,
+        },
+        {'id': url_id},
+    )
+    flash('Страница успешно проверена', 'success')
+    return redirect(url_for('url_detail', url_id=url_id))
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template('500.html'), 500
