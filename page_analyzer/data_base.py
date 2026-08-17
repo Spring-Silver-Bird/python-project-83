@@ -15,6 +15,8 @@ def truncate_text(value: str) -> str:
 
 
 def get_connection(database_url=DATABASE_URL):
+    if not database_url:
+        raise RuntimeError('DATABASE_URL is not set')
     return closing(
         psycopg2.connect(database_url, cursor_factory=RealDictCursor)
     )
