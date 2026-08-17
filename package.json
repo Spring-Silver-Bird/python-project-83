@@ -1,0 +1,11 @@
+{
+  "name": "page-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./page_analyzer/static/input.css -o ./page_analyzer/static/output.css --minify || echo 'Tailwind build skipped: not available'"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
