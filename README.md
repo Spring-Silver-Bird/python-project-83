@@ -1,6 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Spring-Silver-Bird/python-project-83/actions)
-[![my check](https://github.com/lyovaparsyan94/python-project-83/actions/workflows/project_workflow.yml/badge.svg)](https://github.com/lyovaparsyan94/python-project-83/actions/workflows/project_workflow.yml)
+[![my check](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/project_check.yml/badge.svg)](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/project_check.yml)
 
 ### Description
 This is a study project - web-app for brief seo-analysis of sites by url.
