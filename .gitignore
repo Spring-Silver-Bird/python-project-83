@@ -7,3 +7,4 @@ dist/
 .ruff_cache/
 .venv/
 node_modules/
+page_analyzer/static/output.css

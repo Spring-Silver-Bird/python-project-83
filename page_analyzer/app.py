@@ -62,6 +62,7 @@ def add_url():
         flash("Некорректный URL", "danger")
         return render_template(
             "index.html",
+            url=url.get('url', ''),
         ), 422
 
     normalized_url = normalize_url(url['url'])

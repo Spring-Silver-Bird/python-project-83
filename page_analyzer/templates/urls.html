@@ -1,70 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Third project for Hexlet.io">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>Анализатор страниц</title>
-</head>
-<body>
-<header class="flex-shrink-0">
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
-        <a class="navbar-brand" href="{{ url_for('index') }}">Анализатор страниц</a>
-        <div id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('urls') }}">Сайты</a></li>
-            </ul>
-        </div>
-    </nav>
-</header>
+{% extends "index.html" %}
 
-<main class="flex-grow-1">
-    <div class="container-lg mt-3">
-        <h1>Сайты</h1>
+{% block content %}
+<h1 class="mb-4 text-2xl font-bold text-slate-900">Сайты</h1>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover text-nowrap" data-test="urls">
-                <tread>
-                    <tr>
-                        <th>ID</th>
-                        <th>Имя</th>
-                        <th>Последняя проверка</th>
-                        <th>Код ответа</th>
-                    </tr>
-                </tread>
-                <tbody>
-                {% for url in urls %}
-                <tr>
-                    <td>{{ url.id }}</td>
-                    <td><a href="{{ url_for('url_detail', url_id=url.id) }}">{{ url.name }}</a></td>
-                    <td>
-                        {% if url.last_check %}
-                        {{ url.last_check.strftime('%Y-%m-%d') }}
-                        {% else %}
-                        —
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if url.status_code %}
-                        {{ url.status_code }}
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-
-</body>
-</html>
+<div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+  <table class="w-full text-sm text-slate-700" data-test="urls">
+    <thead>
+      <tr class="bg-slate-100 text-left">
+        <th class="w-16 px-4 py-3 font-semibold">ID</th>
+        <th class="px-4 py-3 font-semibold">Имя</th>
+        <th class="px-4 py-3 font-semibold">Последняя проверка</th>
+        <th class="px-4 py-3 font-semibold">Код ответа</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200">
+      {% for url in urls %}
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3">{{ url.id }}</td>
+        <td class="px-4 py-3">
+          <a href="{{ url_for('url_detail', url_id=url.id) }}" class="text-blue-700 hover:underline">
+            {{ url.name }}
+          </a>
+        </td>
+        <td class="px-4 py-3">
+          {% if url.last_check %}
+          {{ url.last_check.strftime('%Y-%m-%d') }}
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        <td class="px-4 py-3">
+          {% if url.status_code %}
+          {{ url.status_code }}
+          {% else %}
+          -
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

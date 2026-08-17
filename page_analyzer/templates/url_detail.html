@@ -1,57 +1,65 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="table-responsive">
-    <h1>Сайт: {{ url.name }}</h1>
-    <table class="table table-bordered table-hover text-nowrap" data-test="url">
-        <tbody>
-            <tr>
-                <td>ID</td>
-                <td>{{ url.id }}</td>
-            </tr>
-            <tr>
-                <td>Имя</td>
-                <td>{{ url.name }}</td>
-            </tr>
-            <tr>
-                <td>Дата создания</td>
-                <td>{{ url.created_at.strftime('%Y-%m-%d') }}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="mb-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+  <table class="w-full text-sm text-slate-700" data-test="url">
+    <tbody class="divide-y divide-slate-200">
+      <tr class="hover:bg-slate-50">
+        <td class="w-44 px-4 py-3 font-semibold text-slate-600">ID</td>
+        <td class="px-4 py-3">{{ url.id }}</td>
+      </tr>
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3 font-semibold text-slate-600">Имя</td>
+        <td class="px-4 py-3">{{ url.name }}</td>
+      </tr>
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3 font-semibold text-slate-600">Дата создания</td>
+        <td class="px-4 py-3">{{ url.created_at.strftime('%Y-%m-%d') }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-<h2 class="mt-5 mb-3">Проверки</h2>
-<form method="post" action="{{ url_for('check_url', url_id=url.id) }}" class="mb-3">
-    <input type="submit" class="btn btn-primary" value="Запустить проверку">
-</form>
-<div>
-    <table class="table table-bordered table-hover mt-2" data-test="checks">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Код ответа</th>
-                <th>h1</th>
-                <th>title</th>
-                <th>description</th>
-                <th>Дата создания</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for url_checked in (urls_checked or []) %}
-            <tr>
-                <td>{{ url_checked.id or '' }}</td>
-                <td>{{ url_checked.status_code or '' }}</td>
-                <td>{{ url_checked.h1 or '' }}</td>
-                <td>{{ url_checked.title or '' }}</td>
-                <td>{{ url_checked.description or '' }}</td>
-                <td>{{ url_checked.created_at.strftime('%Y-%m-%d') or '' }}</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6" class="text-center">Проверок пока нет</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+
+<div class="mb-4 flex items-center justify-between">
+  <h2 class="text-xl font-bold text-slate-900">Проверки</h2>
+  <form method="post" action="{{ url_for('check_url', url_id=url.id) }}">
+    <button
+      type="submit"
+      class="rounded-md bg-emerald-600 px-5 py-2 font-medium text-white hover:bg-emerald-700"
+    >
+      Запустить проверку
+    </button>
+  </form>
+</div>
+
+<div class="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+  <table class="w-full text-sm text-slate-700" data-test="checks">
+    <thead>
+      <tr class="bg-slate-100 text-left">
+        <th class="px-4 py-3 font-semibold">ID</th>
+        <th class="px-4 py-3 font-semibold">Код ответа</th>
+        <th class="px-4 py-3 font-semibold">h1</th>
+        <th class="px-4 py-3 font-semibold">title</th>
+        <th class="px-4 py-3 font-semibold">description</th>
+        <th class="px-4 py-3 font-semibold">Дата создания</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200">
+      {% for url_checked in (urls_checked or []) %}
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3">{{ url_checked.id or '' }}</td>
+        <td class="px-4 py-3">{{ url_checked.status_code or '' }}</td>
+        <td class="px-4 py-3">{{ url_checked.h1 or '' }}</td>
+        <td class="px-4 py-3">{{ url_checked.title or '' }}</td>
+        <td class="px-4 py-3">{{ url_checked.description or '' }}</td>
+        <td class="px-4 py-3">{{ url_checked.created_at.strftime('%Y-%m-%d') or '' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="px-4 py-3 text-center text-slate-500">Проверок пока нет</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

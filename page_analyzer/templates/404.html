@@ -1,15 +1,11 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<body>
-    <div class="d-flex align-items-center justify-content-center vh-100">
-        <div class="text-center">
-            <h1 class="display-1 fw-bold">404</h1>
-            <p class="fs-3"> <span class="text-danger">Ууупс!</span> Такой страницы нет.</p>
-            <p class="lead">
-                Страницы которую вы ищите не существует;(
-            </p>
-        </div>
-    </div>
-</body>
+<div class="flex items-center justify-center py-24">
+  <div class="text-center">
+    <h1 class="text-8xl font-bold text-slate-300">404</h1>
+    <p class="mt-4 text-2xl text-slate-800"><span class="font-semibold text-red-600">Ууупс!</span> Такой страницы нет.</p>
+    <p class="mt-2 text-slate-600">Страницы которую вы ищите не существует;(</p>
+  </div>
+</div>
 {% endblock %}
