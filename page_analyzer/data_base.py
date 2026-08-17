@@ -5,6 +5,13 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+MAX_DISPLAY_LENGTH = 200
+
+
+def truncate_text(value: str) -> str:
+    if len(value) > MAX_DISPLAY_LENGTH:
+        return f'{value[:MAX_DISPLAY_LENGTH]}...'
+    return value
 
 
 def get_connection(database_url=DATABASE_URL):
@@ -88,25 +95,20 @@ class UrlData:
 
     def get_existing_urls(self):
         sql = """
-            SELECT urls.id, urls.name,
-            MAX(url_checks.created_at) AS last_check,
-            MAX(url_checks.status_code) AS status_code
-            FROM urls
-            LEFT JOIN url_checks ON urls.id = url_checks.url_id
-            GROUP BY urls.id
-            ORDER BY urls.id DESC
+            SELECT * FROM (
+                SELECT DISTINCT ON (urls.id)
+                    urls.id, urls.name,
+                    url_checks.created_at AS last_check,
+                    url_checks.status_code
+                FROM urls
+                LEFT JOIN url_checks ON urls.id = url_checks.url_id
+                ORDER BY urls.id, url_checks.created_at DESC, url_checks.id DESC
+            ) AS sub
+            ORDER BY id DESC
         """
         with get_connection(self.db_url) as conn, conn.cursor() as cur:
             cur.execute(sql)
-            urls = []
-            for url in cur.fetchall():
-                urls.append({
-                    'id': url['id'],
-                    'name': url['name'],
-                    'last_check': url['last_check'],
-                    'status_code': url['status_code'],
-                })
-            return urls
+            return cur.fetchall()
 
     def get_url_checks(self, url_id):
         sql = """
@@ -119,33 +121,10 @@ class UrlData:
             cur.execute(sql, (url_id,))
             url_checks_info = cur.fetchall()
             for row in url_checks_info:
-                if row['h1'] is None:
-                    row['h1'] = ''
-                if row['title'] is None:
-                    row['title'] = ''
-                if row['description'] is None:
-                    row['description'] = ''
+                for field in ('h1', 'title', 'description'):
+                    if row[field] is None:
+                        row[field] = ''
+                    else:
+                        row[field] = truncate_text(row[field])
             return url_checks_info
-
-    def get_all_urls_checks(self):
-        sql = '''
-         SELECT DISTINCT ON (urls.id)
-            urls.id AS id,
-            urls.name AS name,
-            url_checks.created_at AS created_at,
-            url_checks.status_code AS status_code
-        FROM urls
-        LEFT JOIN url_checks ON
-            urls.id = url_checks.url_id
-        ORDER BY id, created_at DESC;
-        '''
-        with get_connection(self.db_url) as conn, conn.cursor() as cur:
-            cur.execute(sql)
-            all_urls_checks = cur.fetchall()
-            for row in all_urls_checks:
-                if row['created_at'] is None:
-                    row['created_at'] = ''
-                if row['status_code'] is None:
-                    row['status_code'] = ''
-            return all_urls_checks
 
