@@ -104,7 +104,7 @@ def check_url(url_id):
         return redirect(url_for('url_detail', url_id=url_id))
 
     status_code = r.status_code
-    if str(status_code)[0] in ('4', '5'):
+    if str(status_code)[0] in {'4', '5'}:
         flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for('url_detail', url_id=url_id))
 
@@ -124,10 +124,10 @@ def check_url(url_id):
 
 
 @app.errorhandler(404)
-def page_not_found(error):
+def page_not_found(_error):
     return render_template('404.html'), 404
 
 
 @app.errorhandler(500)
-def server_error(e):
+def server_error(_e):
     return render_template('500.html'), 500
