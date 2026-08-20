@@ -2,6 +2,8 @@
 [![Actions Status](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Spring-Silver-Bird/python-project-83/actions)
 [![my check](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/project_check.yml/badge.svg)](https://github.com/Spring-Silver-Bird/python-project-83/actions/workflows/project_check.yml)
 
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Spring-Silver-Bird_python-project-83&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Spring-Silver-Bird_python-project-83)
+
 ### Description
 This is a study project - web-app for brief seo-analysis of sites by url.
 
